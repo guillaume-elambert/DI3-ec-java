@@ -52,5 +52,12 @@ public class OrdersTableModel extends AbstractTableModel {
 	public String getColumnName(int col) {
         return colNnames[col];
     }
+	
+	/**
+	 * Supprime les données de la table. 
+	 */
+	public void resetTable() {
+		this.fireTableRowsDeleted(0, getRowCount());
+	}
 
 }
