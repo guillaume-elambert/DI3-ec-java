@@ -1,4 +1,4 @@
-package fr.superesi.superapp.monitoring;
+package fr.superesi.superapp.monitoring.model;
 
 import java.util.ArrayList;
 
@@ -8,7 +8,7 @@ import fr.superesi.superapp.Order;
 
 /**
  * TableModel definition. Used in <code>MonitoringAppMainFrame</code> to display data table.
- * 
+ *
  * @author C. Esswein
  *
  */
@@ -52,9 +52,9 @@ public class OrdersTableModel extends AbstractTableModel {
 	public String getColumnName(int col) {
         return colNnames[col];
     }
-	
+
 	/**
-	 * Supprime les données de la table. 
+	 * Supprime les données de la table.
 	 */
 	public void resetTable() {
 		this.fireTableRowsDeleted(0, getRowCount());

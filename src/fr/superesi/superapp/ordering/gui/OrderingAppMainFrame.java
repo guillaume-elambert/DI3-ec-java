@@ -1,4 +1,4 @@
-package fr.superesi.superapp.order.gui;
+package fr.superesi.superapp.ordering.gui;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -13,18 +13,24 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 /**
- * Main Frame class for the order app.
- * 
+ * Class of the main (and only) frame of the ordering application.
+ *
  * @author C. Esswein
+ * @author Guillaume ELAMBERT
  */
 @SuppressWarnings("serial")
-public class OrderAppMainFrame extends JFrame implements ActionListener {
+public class OrderingAppMainFrame extends JFrame implements ActionListener {
 	/**
 	 * Constant defining the app name.
 	 */
-	private static final String APP_NAME = "Order app", PRODUCT = "Product:", QUANTITY = "Quantity:",
-			UNIT_PRICE = "Unit price (euros): ", OK = "Confirm Order", CANCEL="Cancel Order",
-			DEFAULT_UNIT_PRICE = "0", DEFAULT_QUANTITY = "1";
+	private static final String APP_NAME = "Order app",
+			PRODUCT = "Product:",
+			QUANTITY = "Quantity:",
+			UNIT_PRICE = "Unit price (euros): ",
+			OK = "Confirm Order",
+			CANCEL="Cancel Order",
+			DEFAULT_UNIT_PRICE = "0",
+			DEFAULT_QUANTITY = "1";
 
 	private JLabel productLabel, quantityLabel, unitPriceLabel;
 	private JTextField productTextField, quantityTextField, unitPriceTextField;
@@ -52,7 +58,7 @@ public class OrderAppMainFrame extends JFrame implements ActionListener {
 		mainPanel.add(quantityLabel);
 		mainPanel.add(quantityTextField);
 		add(mainPanel, BorderLayout.PAGE_START);
-		
+
 		// Second part : buttons
 		buttonPanel = new JPanel();
 		okButton = new JButton(OK);
@@ -60,40 +66,41 @@ public class OrderAppMainFrame extends JFrame implements ActionListener {
 		buttonPanel.add(okButton);
 		buttonPanel.add(cancelButton);
 		add(buttonPanel, BorderLayout.PAGE_END);
-		
+
 		cancelButton.addActionListener(this);
-		
+
 		// Final set up
 		pack();
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setVisible(true);
 	}
-	
+
 	private void setDefaultValues() {
 		productTextField.setText(null);
 		unitPriceTextField.setText(DEFAULT_UNIT_PRICE);
 		quantityTextField.setText(DEFAULT_QUANTITY);
 	}
-	
+
 	/**
 	 * One and only constructor of the main frame, called by the main method.
 	 */
-	public OrderAppMainFrame() {
+	public OrderingAppMainFrame() {
 		super(APP_NAME);
 		initGUI();
 	}
 
 	/**
 	 * Just the main of the bar app...
-	 * 
+	 *
 	 * @param args
 	 *            - unused main arguments
 	 */
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
-				new OrderAppMainFrame();
+				new OrderingAppMainFrame();
 			}
 		});
 	}
@@ -101,11 +108,11 @@ public class OrderAppMainFrame extends JFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
-		
+
 		if(src.equals(cancelButton)) {
 			setDefaultValues();
 		}
-		
+
 	}
 
 	/**
@@ -247,7 +254,62 @@ public class OrderAppMainFrame extends JFrame implements ActionListener {
 	public void setButtonPanel(JPanel buttonPanel) {
 		this.buttonPanel = buttonPanel;
 	}
-	
-	
+
+	/**
+	 * @return the appName
+	 */
+	public static String getAppName() {
+		return APP_NAME;
+	}
+
+	/**
+	 * @return the product
+	 */
+	public static String getProduct() {
+		return PRODUCT;
+	}
+
+	/**
+	 * @return the quantity
+	 */
+	public static String getQuantity() {
+		return QUANTITY;
+	}
+
+	/**
+	 * @return the unitPrice
+	 */
+	public static String getUnitPrice() {
+		return UNIT_PRICE;
+	}
+
+	/**
+	 * @return the ok
+	 */
+	public static String getOk() {
+		return OK;
+	}
+
+	/**
+	 * @return the cancel
+	 */
+	public static String getCancel() {
+		return CANCEL;
+	}
+
+	/**
+	 * @return the defaultUnitPrice
+	 */
+	public static String getDefaultUnitPrice() {
+		return DEFAULT_UNIT_PRICE;
+	}
+
+	/**
+	 * @return the defaultQuantity
+	 */
+	public static String getDefaultQuantity() {
+		return DEFAULT_QUANTITY;
+	}
+
 
 }

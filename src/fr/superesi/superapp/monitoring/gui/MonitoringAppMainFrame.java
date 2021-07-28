@@ -1,4 +1,4 @@
-package fr.superesi.superapp.monitoring;
+package fr.superesi.superapp.monitoring.gui;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -13,48 +13,50 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
 import fr.superesi.superapp.Order;
+import fr.superesi.superapp.monitoring.model.OrdersTableModel;
 
 /**
- * Main class of monitoring app. Represents the main (and only) frame.
- * 
+ * Class of the main (and only) frame of the monitoring application.
+ *
  * @author C. Esswein
+ * @author Guillaume ELAMBERT
  */
 @SuppressWarnings("serial")
 public class MonitoringAppMainFrame extends JFrame implements ActionListener {
-	
+
 	private JTable table;
 	private OrdersTableModel tableModel;
 	private JPanel mainPanel, buttonPanel;
-	
+
 	private JButton razButton = new JButton("reset table");
 
-	ArrayList<Order> data = new ArrayList<>();
-			
+	private ArrayList<Order> data = new ArrayList<>();
+
 	public MonitoringAppMainFrame() {
-		super("monitoring app");
+		super("Monitoring app");
 		fillInitTableData(); // COMMENT THIS LINE TO REMOVE STUB DATA
 		tableModel = new OrdersTableModel(data);
 		table = new JTable(tableModel);
 		JScrollPane scrollPane = new JScrollPane(table);
-		
+
 		mainPanel = new JPanel();
 		mainPanel.add(scrollPane);
 		add(mainPanel, BorderLayout.PAGE_START);
-		
+
 		buttonPanel = new JPanel();
 		buttonPanel.add(razButton);
 		add(buttonPanel, BorderLayout.PAGE_END);
-		
+
 		razButton.addActionListener(this);
 		table.setAutoCreateRowSorter(true);
-		
+
 		pack();
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 		setVisible(true);
-			
+
 	}
-	
+
 	/**
 	 * Supprime les données de la table des commandes.
 	 */
@@ -62,7 +64,7 @@ public class MonitoringAppMainFrame extends JFrame implements ActionListener {
 		this.data.clear();
 		tableModel.resetTable();
 	}
-	
+
 	/**
 	 * Stub method filling the table with some data sample.
 	 */
@@ -72,20 +74,21 @@ public class MonitoringAppMainFrame extends JFrame implements ActionListener {
 		data.add(new Order("product4",1,1.6f));
 		data.add(new Order("product1",4,1.1f));
 	}
-	
+
 	/**
 	 * Just the main of the monitoring app...
-	 * 
+	 *
 	 * @param args
 	 *            - unused main arguments
 	 */
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
-				
+
 				new MonitoringAppMainFrame();
-				
-				
+
+
 			}
 		});
 	}

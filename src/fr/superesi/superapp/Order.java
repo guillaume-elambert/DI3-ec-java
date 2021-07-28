@@ -4,16 +4,16 @@ import java.io.Serializable;
 
 /**
  * Main data class representing an order (e.g. 2 sodas at 5euros each or 4 wheels at 35euros each or 1 dress at 45 euros)
- * 
+ *
  * @author C. Esswein
  */
 @SuppressWarnings("serial")
 public class Order implements Serializable {
-	
+
 	private String product;
 	private int quantity;
 	private float unitPrice;
-	
+
 	/**
 	 * @param product
 	 * @param quantity
@@ -63,5 +63,5 @@ public class Order implements Serializable {
 	}
 
 	//TODO to be continued if needed
-	
+
 }
