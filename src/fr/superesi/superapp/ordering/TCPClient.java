@@ -22,9 +22,11 @@ public class TCPClient {
 	public static final int defaultPort = 1024;				/**< Le port par défaut  du serveur TCP distant. */
 	public static final long defaultRetryTime = 10000;		/**< Le temps d'attente en millisecondes avant de retenter une connexion avec le serveur. */
 
-	private String host;	/**< Le nom/ip du serveur TCP distant. */
-	private int port;		/**< Le port du serveur TCP distant. */
-	private Socket socket;	/**< La connexion au serveur TCP distant. */
+	private String host;					/**< Le nom/ip du serveur TCP distant. */
+	private int port;						/**< Le port du serveur TCP distant. */
+	private Socket socket;					/**< La connexion au serveur TCP distant. */
+	private ArrayList<Order> unsentOrders;	/**< Liste des commandes qui n'ont pa pu être envoyées. */
+	private boolean resendScheduled;		/**< Définit si l'on à prévu de renvoyé les commandes dont l'envoi a échoué. */
 
 
 	/**
@@ -45,6 +47,7 @@ public class TCPClient {
 		this.host = host;
 		this.port = port;
 		socket = null;
+		unsentOrders = new ArrayList<>();
 	}
 
 
@@ -75,6 +78,7 @@ public class TCPClient {
 			e.printStackTrace();
 		}
 
+		System.out.println("Scheduling reconnetion in "+defaultRetryTime+" milliseconds.");
 		// On retente la connexion avec le serveur dans defaultRetryTime millisecondes
 		new Timer().schedule(new TimerTask() {
 			@Override
@@ -100,32 +104,93 @@ public class TCPClient {
 	/**
 	 * Méthode qui permet d'envoyer une liste de commandes au serveur TCP distant.
 	 *
-	 * @param orderToSend La liste de commandes à envoyer.
+	 * @param ordersToSend La liste de commandes à envoyer.
 	 */
 	public void sendOrders(ArrayList<Order> ordersToSend) {
-		if( !this.getConnexionStatus() ) {
+		
+		// Entrée : la socket n'est pas connectée au serveur
+		//		=> on reprogramme l'envoi
+		if( !getConnexionStatus() ) {
 			System.err.println("TCPClient : can't send order because socket isn't connected to server.");
+			unsentOrders.addAll(ordersToSend);
+			sheduleSendUnsentOrders();
 			return;
 		}
 
 
         try {
-			// get the output stream from the socket.
+			// On récupère l'output stream de la socket connectée
 	        OutputStream outputStream = socket.getOutputStream();
 
-	        // create an object output stream from the output stream so we can send an object through it
+	        // On créé un objet ObjectOutputStream qui va contenir l'ensemble de nos commandes
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-
+			
+			// On envoie les commandes au server
 	        objectOutputStream.writeObject(ordersToSend);
 	        objectOutputStream.flush();
 	        objectOutputStream.close();
 
-	        System.out.println("Sent !");
+	        System.out.println("TCPClient : Orders sent :");
+	        ordersToSend.forEach((order) -> System.out.println(order.toString()));
 
 		} catch (IOException e) {
 			e.printStackTrace();
+			
+			// On reprogramme l'envoi
+			unsentOrders.addAll(ordersToSend);
+			sheduleSendUnsentOrders();
 		}
 	}
+	
+	
+	/**
+	 * Méthode qui permet de programmer l'envoi des commandes n'ayant pas pu être 
+	 * envoyées précédemment.
+	 */
+	public void sheduleSendUnsentOrders(){
+		
+		// Entrée : On a déjà programmé le fait de renvoyer les commandes dont l'envoi à échoué
+		//		=> On sort.
+		if(resendScheduled) {
+			System.out.println("TCPClient : Already scheduled.");
+			return;
+		}
+		
+		// Entrée : Renvoi programmé alors que la liste est vide
+		//		=> On sort.
+		if( unsentOrders.isEmpty()) {
+			System.out.println("TCPClient : Unset orders list is empty, unscheduling.");
+			resendScheduled = false;
+			return;
+		}
+		
+		resendScheduled = true;
+		System.out.println("TCPClient : Sheduling to resend unsent orders.");
+		
+		
+		// Tâche programmée à éxecuter après defaultRetryTime millisecondes
+		new Timer().schedule(new TimerTask() {
+
+			@Override
+			public void run() {
+				resendScheduled = false;	
+				
+				// Entrée : Le client TCP n'est pas connecté au serveur
+				//		=> On reprogramme l'envoi
+				if (!getConnexionStatus()) {
+					System.err.println("TCPClient : can't send order because socket isn't connected to server.");
+					sheduleSendUnsentOrders();
+					return;
+				}
+				
+				
+				System.out.println("TCPClient : Running scheduling");
+				sendOrders(unsentOrders);
+			}
+			
+		}, defaultRetryTime);
+	}
+	
 
 	/**
 	 * Méthode qui retourne l'état de connexion du client TCP.
