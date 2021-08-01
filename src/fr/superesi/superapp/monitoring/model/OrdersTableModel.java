@@ -15,7 +15,7 @@ import fr.superesi.superapp.Order;
 @SuppressWarnings("serial")
 public class OrdersTableModel extends AbstractTableModel {
 
-	private String[] colNnames= {"Product","Unit price (euros)","Quantity","Total Price (euros)"};
+	private String[] colNnames= {"Id","Product","Unit price (euros)","Quantity","Total Price (euros)"};
 	private ArrayList<Order> data;
 
 	public OrdersTableModel(ArrayList<Order> data) {
@@ -30,20 +30,22 @@ public class OrdersTableModel extends AbstractTableModel {
 
 	@Override
 	public int getColumnCount() {
-		return 4;
+		return 5;
 	}
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		switch (columnIndex) {
-
+		
 		case 0:
-			return data.get(rowIndex).getProduct();
+			return data.get(rowIndex).getId();
 		case 1:
-			return data.get(rowIndex).getUnitPrice();
+			return data.get(rowIndex).getProduct();
 		case 2:
+			return data.get(rowIndex).getUnitPrice();
+		case 3:
 			return data.get(rowIndex).getQuantity();
-		case 3 : return (data.get(rowIndex).getUnitPrice()*
+		case 4 : return (data.get(rowIndex).getUnitPrice()*
 						 data.get(rowIndex).getQuantity());
 		}
 		return null;
@@ -56,8 +58,8 @@ public class OrdersTableModel extends AbstractTableModel {
 	/**
 	 * Supprime les données de la table.
 	 */
-	public void resetTable() {
-		this.fireTableRowsDeleted(0, getRowCount());
+	public void resetTable() {		
+		fireTableRowsDeleted(0, getRowCount());
 	}
 
 }

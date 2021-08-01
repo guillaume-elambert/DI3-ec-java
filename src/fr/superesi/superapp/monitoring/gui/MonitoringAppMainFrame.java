@@ -4,6 +4,10 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -27,8 +31,11 @@ public class MonitoringAppMainFrame extends JFrame implements ActionListener {
 	private JTable table;
 	private OrdersTableModel tableModel;
 	private JPanel mainPanel, buttonPanel;
+	
+	private static final String[] TOGGLE_BUTTON_TEXT = {"organize by products", "organize by orders"};
 
 	private JButton razButton = new JButton("reset table");
+	private JButton toggleButton = new JButton(TOGGLE_BUTTON_TEXT[0]);
 
 	private ArrayList<Order> data = new ArrayList<>();
 
@@ -45,8 +52,10 @@ public class MonitoringAppMainFrame extends JFrame implements ActionListener {
 
 		buttonPanel = new JPanel();
 		buttonPanel.add(razButton);
+		buttonPanel.add(toggleButton);
 		add(buttonPanel, BorderLayout.PAGE_END);
 
+		toggleButton.addActionListener(this);
 		razButton.addActionListener(this);
 		table.setAutoCreateRowSorter(true);
 
@@ -61,8 +70,19 @@ public class MonitoringAppMainFrame extends JFrame implements ActionListener {
 	 * Supprime les données de la table des commandes.
 	 */
 	public void resetData() {
-		this.data.clear();
+		if(data.isEmpty()) return;
+		
+		data.clear();
 		tableModel.resetTable();
+	}
+	
+	
+	/**
+	 * Méthode qui remet le model par défaut (<code>tableModel</code>).
+	 */
+	public void resetTableModel() {
+		table.setModel(tableModel);
+		toggleButton.setText(TOGGLE_BUTTON_TEXT[0]);
 	}
 
 	/**
@@ -95,8 +115,76 @@ public class MonitoringAppMainFrame extends JFrame implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		//Entrée : on a cliqué sur le bouton de réinitialisation
 		if(e.getSource().equals(razButton)) {
 			resetData();
+			resetTableModel();
+		}
+		// Entrée : on à cliquer sur le bouton pour changer de vue 
+		else if(e.getSource().equals(toggleButton)) {
+			
+			// Entrée : on souhaite avoir la vue normale (table par commandes)
+			//		=> On reinitialise le modèle de table et on sort.
+			if(!table.getModel().equals(tableModel)) {
+				resetTableModel();
+				return;
+			}
+			
+			setOrderedProductTable();			
+		}
+	}
+	
+	
+	/**
+	 * Méthode qui définit le contenu de la table comme étant le regroupement 
+	 * des produits ayant le même nom. Ainsi le prix unitaire affiché est la 
+	 * moyenne des prix unitaire des commandes passées pour ce produit et la 
+	 * quantité est la quantité totale commandée.
+	 */
+	public void setOrderedProductTable(){
+		
+		// On regroupe les élément du tableau ayant le même nom de produit
+		Map<String, List<Order>> orderedByProduct = data.stream().collect(Collectors.groupingBy(order -> order.getProduct()));
+		ArrayList<Order> productOrderedList = new ArrayList<>();
+		
+		// Initialisation des variables
+		int productCounter = 0;
+		String productName = "";
+		float averageProductPrice, currentOrderUnitPrice;
+		int totalProductQuantity, currentOrderQuantity;
+		
+		// On parcourt l'ensemble des produits
+		for(Entry<String, List<Order>> entry : orderedByProduct.entrySet()) {
+			
+			++productCounter;
+			
+			// On récupère le nom du produit courrant et on initialise le prix et la qte
+			productName = entry.getKey();
+			averageProductPrice = 0;
+			totalProductQuantity = 0;
+			
+			// On parcourt l'ensemble des commandes d'un produit
+			for(Order order : entry.getValue()) {
+				
+				// On récupère la quantité et le prix unitaire de la commande parcourue
+				currentOrderUnitPrice = order.getUnitPrice();
+				currentOrderQuantity = order.getQuantity();
+				
+				// On fait la moyenne du prix unitaire
+				averageProductPrice = ( averageProductPrice*totalProductQuantity + currentOrderUnitPrice*currentOrderQuantity ) / ( totalProductQuantity+currentOrderQuantity );
+				totalProductQuantity +=  currentOrderQuantity;
+				
+			}
+			
+			// On ajoute une "nouvell commande" qui contient la moyenne des prix, et la quantité totale commandée. 
+			if(!productOrderedList.add(new Order(productCounter, productName, totalProductQuantity, averageProductPrice))) break;
+		}
+		
+		// Si rien n'a été trié, on ne change pas la vue
+		if(!productOrderedList.isEmpty()) {
+			// On change la vue (basée sur le nouveau tableau).
+			table.setModel(new OrdersTableModel(productOrderedList));
+			toggleButton.setText(TOGGLE_BUTTON_TEXT[1]);
 		}
 	}
 

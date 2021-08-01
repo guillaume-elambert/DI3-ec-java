@@ -68,18 +68,8 @@ public class MonitoringApp {
 	 */
 	public boolean addOrdersMainFrame(ArrayList<Order> ordersToAdd) {
 		ArrayList<Order> orders = mainFrame.getData();
-
-		// On affiche le contenu de toutes les commandes reçues.
-		System.out.println("All orders:");
-		ordersToAdd.forEach((order) -> System.out.println(
-				order.getProduct() + "\t" +
-				order.getQuantity() + "\t" +
-				order.getUnitPrice() + "€")
-		);
-
+		
 		if(!orders.addAll(ordersToAdd)) return false;
-
-		System.out.println("Added to main frame");
 		mainFrame.setData(orders);
 
 		return true;
@@ -115,6 +105,12 @@ public class MonitoringApp {
 							// On ajoute l'ensemble des commande dans le tableau.
 							addOrdersMainFrame(listOfOrders);
 							listOfOrders.clear();
+							
+							// Entrée : on visualise la vue triée par produits
+							//		=> On met à jour la vue.
+							if(!mainFrame.getTable().getModel().equals(mainFrame.getTableModel())) {
+								mainFrame.setOrderedProductTable();
+							}
 
 							// On libère le tableau.
 							listOfOrders.notifyAll();
